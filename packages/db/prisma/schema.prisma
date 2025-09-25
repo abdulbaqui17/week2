@@ -44,7 +44,7 @@ model Trigger {
 
   availableTriggerId String
   type               AvailableTrigger  @relation(fields: [availableTriggerId], references: [id])
-
+  sortingOrder      Int @default(0)
   config             Json?
 }
 
