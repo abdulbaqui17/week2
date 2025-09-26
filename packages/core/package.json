@@ -1,0 +1,16 @@
+{
+  "name": "@pkg/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/executor.ts"
+  },
+  "dependencies": {
+    "@pkg/kafka": "*",
+    "@prisma/client": "^6.16.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.11"
+  }
+}

@@ -42,8 +42,14 @@
     "skipLibCheck": true,
     "baseUrl": "../../",
     "paths": {
+      "@/*": ["./*"],
       "@pkg/kafka": ["packages/kafka/src/index.ts"],
-      "@pkg/kafka/topics": ["packages/kafka/src/topics.ts"]
+      "@pkg/kafka/topics": ["packages/kafka/src/topics.ts"],
+      "@pkg/core": ["packages/core/src/executor.ts"]
     }
-  }
+  },
+  "include": [
+    "src",
+    "../../db/prisma/prisma.ts"
+  ]
 }
