@@ -5,8 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -14,75 +15,73 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-
-  zaps      Zap[]
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  email                  String                   @unique
+  password               String
+  zaps                   Zap[]
 }
 
 model Zap {
-  id        String   @id @default(uuid())
-  name      String
+  id   String @id @default(uuid())
+  name String
 
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  zapRun    ZapRun[]
-  trigger   Trigger?
-  action    Action[]
+  zapRun  ZapRun[]
+  trigger Trigger?
+  action  Action[]
 }
 
 model Trigger {
-  id                 String            @id @default(uuid())
+  id String @id @default(uuid())
 
-  zapId              String            @unique
-  zap                Zap               @relation(fields: [zapId], references: [id])
+  zapId String @unique
+  zap   Zap    @relation(fields: [zapId], references: [id])
 
   availableTriggerId String
-  type               AvailableTrigger  @relation(fields: [availableTriggerId], references: [id])
-  sortingOrder      Int @default(0)
+  type               AvailableTrigger @relation(fields: [availableTriggerId], references: [id])
+  sortingOrder       Int              @default(0)
   config             Json?
 }
 
 model AvailableTrigger {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id   String @id @default(uuid())
+  name String @unique
 
-  triggers    Trigger[]
+  triggers Trigger[]
 }
 
 model Action {
-  id                String            @id @default(uuid())
+  id String @id @default(uuid())
 
-  zapId             String
-  zap               Zap               @relation(fields: [zapId], references: [id], onDelete: Cascade)
+  zapId String
+  zap   Zap    @relation(fields: [zapId], references: [id], onDelete: Cascade)
 
   availableActionId String
-  type              AvailableAction   @relation(fields: [availableActionId], references: [id])
+  type              AvailableAction @relation(fields: [availableActionId], references: [id])
 }
 
 model AvailableAction {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
 
-  actions     Action[]
+  actions Action[]
 }
 
 model ZapRun {
-  id          String        @id @default(uuid())
+  id           String        @id @default(uuid())
   zapRunOutbox ZapRunOutbox?
-  zapId       String
-  metaData    Json
-  zap         Zap           @relation(fields: [zapId], references: [id])
+  zapId        String
+  metaData     Json
+  zap          Zap           @relation(fields: [zapId], references: [id])
 }
 
 model ZapRunOutbox {
-  id       String   @id @default(uuid())
-  zapRunId String   @unique
-  zapRun   ZapRun   @relation(fields: [zapRunId], references: [id])
+  id       String @id @default(uuid())
+  zapRunId String @unique
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
 }

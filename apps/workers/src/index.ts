@@ -1,6 +1,6 @@
-import { createConsumer } from '@pkg/kafka';
-import { Topics } from '@pkg/kafka/topics';
-import { executeZapRun } from '@pkg/core';
+import { createConsumer } from '../../../packages/kafka/src/index.js';
+import { Topics } from '../../../packages/kafka/src/topics.js';
+import { executeZapRun } from '../../../packages/core/src/executor.js';
 
 async function main() {
     const consumer = await createConsumer('main-worker');

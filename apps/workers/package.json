@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsc -b && nodemon dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.2"
+  },
   "dependencies": {
     "@pkg/core": "*",
     "@pkg/kafka": "*"

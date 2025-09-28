@@ -1,0 +1,97 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: week2
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - apis
+
+  apis:
+    build:
+      context: .
+      dockerfile: apps/apis/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/week2
+      KAFKA_BROKERS: kafka:9092
+      JWT_SECRET: b7e2c1a4e5d6f8c9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3
+      RESEND_EMAIL_KEY: re_ZvsEJWxT_39gM15qkQtcXGLnxewQ3yrf1
+      RESEND_FROM: mohd.baqui13@gmail.com
+      APP_BASE_URL: http://apis:3001
+      FRONTEND_URL: http://web:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - kafka
+
+  processor:
+    build:
+      context: .
+      dockerfile: apps/processor/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/week2
+      KAFKA_BROKERS: kafka:9092
+      JWT_SECRET: b7e2c1a4e5d6f8c9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3
+      APP_BASE_URL: http://apis:3001
+      FRONTEND_URL: http://web:3000
+    depends_on:
+      - postgres
+      - kafka
+
+  workers:
+    build:
+      context: .
+      dockerfile: apps/workers/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/week2
+      KAFKA_BROKERS: kafka:9092
+      JWT_SECRET: b7e2c1a4e5d6f8c9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3
+      APP_BASE_URL: http://apis:3001
+      FRONTEND_URL: http://web:3000
+    depends_on:
+      - postgres
+      - kafka
+
+volumes:
+  pgdata:
+
+

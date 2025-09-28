@@ -5,7 +5,7 @@ export async function httpRequest(config: any, input: any) {
   const res = await fetch(url, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body,
   });
   const text = await res.text();
   let parsed: any = text;

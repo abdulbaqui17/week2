@@ -1,4 +1,5 @@
-import { prisma } from '@/db/prisma/prisma.js';
+import { PrismaClient } from '../../db/generated/prisma/index.js';
+const prisma = new PrismaClient();
 import { httpRequest } from './actions/httpRequest.js';
 import { sendEmail } from './actions/sendEmail.js';
 

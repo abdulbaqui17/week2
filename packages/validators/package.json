@@ -1,0 +1,15 @@
+{
+  "name": "@repo/validators",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/auth.js",
+  "types": "./dist/auth.d.ts",
+  "exports": {
+    ".": "./dist/auth.js",
+    "./auth": "./dist/auth.js"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}
