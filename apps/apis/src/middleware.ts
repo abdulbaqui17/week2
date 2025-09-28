@@ -22,7 +22,7 @@ export const authMiddleware = (
         }
 
         // @ts-ignore - extending Request type
-        req.id = payload.id;
+        req.user = { id: payload.id as number };
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) {

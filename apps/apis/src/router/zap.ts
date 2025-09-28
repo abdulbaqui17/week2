@@ -6,8 +6,7 @@ import { prisma } from "../prisma.js";
 declare global {
   namespace Express {
     interface User {
-      id: string;
-      // add other user properties if needed
+      id: number;
     }
     interface Request {
       user: User;
@@ -28,7 +27,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const zap = await prisma.zap.create({
       data: {
         name: body.name,
-        userId: Number(req.user.id),
+        userId: req.user.id,
         action: {
           create: body.actions.map((action: any, index: number) => ({
             sortingOrder: index,
@@ -62,8 +61,8 @@ router.post("/", authMiddleware, async (req, res) => {
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const zaps = await prisma.zap.findMany({
-      where: { userId: Number(req.user.id) },
-      include: { action: true, trigger: true },
+      where: { userId: req.user.id },
+      include: { action: true, trigger: { include: { type: true } } },
     });
     return res.status(200).json({ zaps });
   } catch (error) {
@@ -79,7 +78,7 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
   }
   try {
     const zap = await prisma.zap.findFirst({
-      where: { id: zapId, userId: Number(req.user.id) },
+      where: { id: zapId, userId: req.user.id },
       include: { action: true, trigger: true },
     });
     if (!zap) {

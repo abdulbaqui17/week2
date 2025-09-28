@@ -1,8 +1,5 @@
 import dotenv from "dotenv";
-// Only load .env if DATABASE_URL is not already set (for local development)
-if (!process.env.DATABASE_URL) {
-  dotenv.config({ path: "../../.env" });
-}
+dotenv.config({ path: "../../.env" });
 
 import express from "express";
 import userRouter from "./router/user.js";

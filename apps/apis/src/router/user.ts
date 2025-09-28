@@ -45,10 +45,9 @@ router.post("/signin", async (req, res) => {
 });
 
 router.get("/user", authMiddleware, async (req, res) => {
-    // @ts-ignore
-    const id =req.id
-    const user =await prisma.user.findUnique({ where: { id },select:{name:true,email:true} });
-    return res.status(200).json({ ok: true, user  });
+        const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { name: true, email: true } });
+        return res.status(200).json({ ok: true, user });
+
 });
 
 export default router;

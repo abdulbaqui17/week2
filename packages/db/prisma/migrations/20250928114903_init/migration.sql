@@ -1,0 +1,19 @@
+/*
+  Warnings:
+
+  - You are about to drop the column `emailVerified` on the `User` table. All the data in the column will be lost.
+  - You are about to drop the `EmailVerificationToken` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `SignupVerification` table. If the table is not empty, all the data it contains will be lost.
+
+*/
+-- DropForeignKey
+ALTER TABLE "public"."EmailVerificationToken" DROP CONSTRAINT "EmailVerificationToken_userId_fkey";
+
+-- AlterTable
+ALTER TABLE "public"."User" DROP COLUMN "emailVerified";
+
+-- DropTable
+DROP TABLE "public"."EmailVerificationToken";
+
+-- DropTable
+DROP TABLE "public"."SignupVerification";
