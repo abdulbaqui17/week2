@@ -3,16 +3,11 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  --background: 257 100% 2%;
+  --foreground: 0 0% 100%;
+  --border: 0 0% 100% / 0.08;
 }
 
 body {
-  background-color: #05010d;
-  color: #ffffff;
-  font-family: var(--font-geist-sans), sans-serif;
-}
-
-::selection {
-  background-color: rgba(255, 107, 44, 0.8);
-  color: #ffffff;
+  @apply bg-[#05010d] text-white antialiased;
 }

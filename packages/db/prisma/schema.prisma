@@ -21,6 +21,8 @@ model User {
   email                  String                   @unique
   password               String
   zaps                   Zap[]
+  forms                  Form[]
+  telegramBots           TelegramBot[]
 }
 
 model Zap {
@@ -45,6 +47,13 @@ model Trigger {
   type               AvailableTrigger @relation(fields: [availableTriggerId], references: [id])
   sortingOrder       Int              @default(0)
   config             Json?
+
+  // New optional relations for specific trigger types
+  formId        String?        @unique
+  form          Form?          @relation(fields: [formId], references: [id])
+
+  telegramBotId String?
+  telegramBot   TelegramBot?   @relation(fields: [telegramBotId], references: [id])
 }
 
 model AvailableTrigger {
@@ -62,6 +71,7 @@ model Action {
 
   availableActionId String
   type              AvailableAction @relation(fields: [availableActionId], references: [id])
+  config            Json?
 }
 
 model AvailableAction {
@@ -78,10 +88,63 @@ model ZapRun {
   zapId        String
   metaData     Json
   zap          Zap           @relation(fields: [zapId], references: [id])
+
+  // Execution status and results
+  status      ZapRunStatus   @default(queued)
+  output      Json?
+  error       Json?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
 
 model ZapRunOutbox {
   id       String @id @default(uuid())
   zapRunId String @unique
   zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
+}
+
+// New models for Form Trigger
+model Form {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  fields      Json
+  published   Boolean  @default(false)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submissions FormSubmission[]
+  trigger     Trigger?
+}
+
+model FormSubmission {
+  id          String   @id @default(uuid())
+  formId      String
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  data        Json
+  submittedAt DateTime @default(now())
+}
+
+// New model for Telegram Bot Trigger
+model TelegramBot {
+  id        String   @id @default(uuid())
+  name      String
+  tokenEnc  String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  triggers  Trigger[]
+}
+
+enum ZapRunStatus {
+  queued
+  running
+  success
+  failed
 }

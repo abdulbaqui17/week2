@@ -26,3 +26,39 @@ export async function createConsumer(groupId: string): Promise<Consumer> {
   await c.connect();
   return c;
 }
+
+// New utility functions
+const KAFKA_BROKER = process.env.KAFKA_BROKER || 'kafka:9092';
+
+export async function waitForKafka(maxMs: number = 30000): Promise<void> {
+  const kafka = new Kafka({
+    clientId: 'kafka-wait',
+    brokers: [KAFKA_BROKER],
+  });
+  const admin = kafka.admin();
+  const startTime = Date.now();
+  let delay = 1000; // Start with 1s
+
+  while (Date.now() - startTime < maxMs) {
+    try {
+      await admin.connect();
+      await admin.disconnect();
+      return;
+    } catch (error) {
+      if (Date.now() - startTime + delay >= maxMs) {
+      throw new Error(`Failed to connect to Kafka at ${KAFKA_BROKER} within ${maxMs}ms: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2; // Exponential backoff
+    }
+  }
+  throw new Error(`Failed to connect to Kafka at ${KAFKA_BROKER} within ${maxMs}ms`);
+}
+
+export function makeProducer(): Producer {
+  const kafka = new Kafka({
+    clientId: 'producer-client',
+    brokers: [KAFKA_BROKER],
+  });
+  return kafka.producer({ createPartitioner: Partitioners.LegacyPartitioner });
+}

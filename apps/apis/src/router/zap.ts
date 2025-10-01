@@ -30,7 +30,6 @@ router.post("/", authMiddleware, async (req, res) => {
         userId: req.user.id,
         action: {
           create: body.actions.map((action: any, index: number) => ({
-            sortingOrder: index,
             availableActionId: action.availableActionId,
             config: action.actionMetadata || {},
           })),
@@ -38,12 +37,17 @@ router.post("/", authMiddleware, async (req, res) => {
       },
       include: { action: true }
     });
+    
+    // Extract formId from trigger metadata if it exists
+    const formId = body.triggerMetadata?.formId || null;
+    
     const trigger = await prisma.trigger.create({
       data: {
         availableTriggerId: body.availableTriggerId,
         zapId: zap.id,
         config: body.triggerMetadata || {},
         sortingOrder: 0,
+        ...(formId ? { formId } : {}),
       }
     });
     await prisma.zap.update({
@@ -87,6 +91,45 @@ router.get("/:zapId", authMiddleware, async (req, res) => {
     return res.status(200).json({ zap });
   } catch (error) {
     console.error("Error fetching zap:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/:zapId/run", authMiddleware, async (req, res) => {
+  const zapId = typeof req.params.zapId === "string" ? req.params.zapId : "";
+  if (!zapId) {
+    return res.status(400).json({ error: "Zap ID is required" });
+  }
+
+  const { metaData } = req.body;
+
+  try {
+    // Validate zap belongs to user
+    const zap = await prisma.zap.findFirst({
+      where: { id: zapId, userId: req.user.id },
+    });
+    if (!zap) {
+      return res.status(404).json({ error: "Zap not found" });
+    }
+
+    // Create ZapRun
+    const zapRun = await prisma.zapRun.create({
+      data: {
+        zapId,
+        metaData: metaData ?? {},
+      },
+    });
+
+    // Create ZapRunOutbox
+    await prisma.zapRunOutbox.create({
+      data: {
+        zapRunId: zapRun.id,
+      },
+    });
+
+    return res.status(200).json({ ok: true, zapRunId: zapRun.id });
+  } catch (error) {
+    console.error("Error running zap:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

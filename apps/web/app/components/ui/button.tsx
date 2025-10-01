@@ -22,7 +22,6 @@ type Variant = keyof typeof variants;
 interface ButtonBaseProps {
   variant?: Variant;
   className?: string;
-  children: React.ReactNode;
 }
 
 interface ButtonAsButton extends ButtonBaseProps,
